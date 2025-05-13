@@ -21,6 +21,7 @@ const ResumeFile = () => {
       name: '', contact: '', address: '', email: '', photo: null,
       facebook: '', instagram: '', linkedin: '', objective: '',
       experience: [''], education: [''],
+       projects: [{ description: '', link: '' }]
     }
   });
 
@@ -29,6 +30,8 @@ const ResumeFile = () => {
 
   const { fields: expFields, append: appendExp, remove: removeExp } = useFieldArray({ control, name: 'experience' });
   const { fields: eduFields, append: appendEdu, remove: removeEdu } = useFieldArray({ control, name: 'education' });
+  const { fields: projectFields, append: appendProject, remove: removeProject } = useFieldArray({ control, name: 'projects' });
+
 
   const onSubmit = (data) => setSubmittedData({ ...data, photo: photoPreview });
 
@@ -59,20 +62,50 @@ const ResumeFile = () => {
         </div>
 
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2 text-blue-600">Social Profiles</h3>
-          <ul className="space-y-1">
-            {['facebook', 'instagram', 'linkedin'].map(key => (
-              data[key] && (
-                <li key={key}>
-                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong>{' '}
-                  <a href={data[key]} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                    {data[key]}
-                  </a>
-                </li>
-              )
-            ))}
-          </ul>
-        </div>
+  <h3 className="text-xl font-semibold mb-4 text-blue-600">Social Profiles</h3>
+  <ul className="space-y-2 text-base sm:text-lg">
+    {data.facebook && (
+      <li>
+        <strong>Facebook:</strong>{' '}
+        <a
+          href={data.facebook}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 underline break-all"
+        >
+          {data.facebook}
+        </a>
+      </li>
+    )}
+    {data.instagram && (
+      <li>
+        <strong>Instagram:</strong>{' '}
+        <a
+          href={data.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 underline break-all"
+        >
+          {data.instagram}
+        </a>
+      </li>
+    )}
+    {data.linkedin && (
+      <li>
+        <strong>LinkedIn:</strong>{' '}
+        <a
+          href={data.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 underline break-all"
+        >
+          {data.linkedin}
+        </a>
+      </li>
+    )}
+  </ul>
+</div>
+
 
         {data.objective && (
           <div className="mb-6">
@@ -99,6 +132,27 @@ const ResumeFile = () => {
           </div>
         )}
 
+  {data.projects && data.projects.some(p => p.description || p.link) && (
+  <div className="mb-6">
+    <h3 className="text-xl font-semibold mb-2 text-blue-600">Projects</h3>
+    <ul className="list-disc ml-5 space-y-2 text-gray-700">
+      {data.projects.map((proj, i) => (
+        (proj.description || proj.link) && (
+          <li key={i}>
+            {proj.description && <p className="font-medium">{proj.description}</p>}
+            {proj.link && (
+              <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-all">
+                {proj.link}
+              </a>
+            )}
+          </li>
+        )
+      ))}
+    </ul>
+  </div>
+)}
+
+
         <div className="flex gap-4 mt-6">
           <button onClick={() => window.print()} className="bg-green-600 text-white px-6 py-2 rounded-md">Print</button>
           <button onClick={handleBack} className="bg-gray-400 text-white px-6 py-2 rounded-md">Back</button>
@@ -109,6 +163,11 @@ const ResumeFile = () => {
 
   // =================== RESUME FORM ===================
   return (
+    <>
+     <motion.h1 className="flex text-blue-400 text-center items-center justify-center font-bold text-2xl mt-4" initial={{
+          scale:0}} animate={{scale:1}} transition={{duration:1}}>
+          Resume Builder
+          </motion.h1>
     <motion.form
       onSubmit={handleSubmit(onSubmit)}
       className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-gradient-to-br from-white to-blue-50 min-h-screen"
@@ -183,6 +242,43 @@ const ResumeFile = () => {
           ))}
           <button type="button" onClick={() => appendEdu('')} className="text-sm text-blue-600 font-medium hover:underline mt-1">+ Add Education</button>
         </div>
+
+ {/* Projects */}
+<div className="mt-6">
+  <h3 className="text-lg font-semibold text-gray-700 mb-2">Projects</h3>
+  {projectFields.map((item, index) => (
+    <div key={item.id} className="mb-4 border p-3 rounded-md bg-gray-50">
+      <div className="mb-2">
+        <label className="block font-medium text-gray-800 mb-1">Description</label>
+        <input
+          className="w-full p-2 border border-gray-300 rounded-lg"
+          placeholder={`Project #${index + 1} description`}
+          {...register(`projects.${index}.description`)} 
+        />
+      </div>
+      <div>
+        <label className="block font-medium text-gray-800 mb-1">Link</label>
+        <input
+          className="w-full p-2 border border-gray-300 rounded-lg"
+          placeholder={`Project #${index + 1} link`}
+          {...register(`projects.${index}.link`)} 
+        />
+      </div>
+      {projectFields.length > 1 && (
+        <button type="button" onClick={() => removeProject(index)} className="text-red-500 mt-2">✕ Remove</button>
+      )}
+    </div>
+  ))}
+  <button
+    type="button"
+    onClick={() => appendProject({ description: '', link: '' })}
+    className="text-sm text-blue-600 font-medium hover:underline mt-2"
+  >
+    + Add Project
+  </button>
+</div>
+
+
       </motion.div>
 
       <div className="md:col-span-2 flex justify-center mt-6">
@@ -192,6 +288,7 @@ const ResumeFile = () => {
         </motion.button>
       </div>
     </motion.form>
+    </>
   );
 };
 
